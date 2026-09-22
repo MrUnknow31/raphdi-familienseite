@@ -1,20 +1,108 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Startseite | Raphdi-LoGaKo<</title>
-    <style>
-        /* Dieser Zielbildschirm kann später durch den eigentlichen Inhalt ersetzt werden. */
-        body { min-height: 100vh; margin: 0; display: grid; place-items: center; color: #132238; font-family: Arial, Helvetica, sans-serif; background: #eaf4fb; }
-        main { padding: 40px; text-align: center; background: #fff; border-radius: 12px; box-shadow: 0 18px 45px rgba(19, 34, 56, .12); }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Startseite | Raphdi-LoGaKo</title>
+<style>
+  :root { --dunkel: #132238; --blau: #1769aa; --hell-blau: #eaf4fb; --grau: #637083; --rand: #d6dee8; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    color: var(--dunkel);
+    font-family: Arial, Helvetica, sans-serif;
+    background: linear-gradient(160deg, #eaf4fb, #f8fbfd 55%, #dce9f3);
+    min-height: 100vh;
+  }
+  .kopf {
+    background: linear-gradient(120deg, var(--dunkel), #285a8f);
+    color: #fff;
+    padding: 48px 24px;
+    text-align: center;
+  }
+  .kopf .marke { margin: 0 0 8px; color: #9fc6e8; font-weight: bold; letter-spacing: .12em; text-transform: uppercase; }
+  .kopf h1 { margin: 0; font-size: clamp(1.8rem, 4vw, 2.6rem); }
+  .kopf p { margin: 10px 0 0; color: #cddbe8; }
+  .inhalt { max-width: 960px; margin: 0 auto; padding: 40px 24px 64px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+  .karte {
+    background: #fff;
+    border: 1px solid rgba(19, 34, 56, .1);
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(19, 34, 56, .08);
+    padding: 26px;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .karte:hover { transform: translateY(-4px); box-shadow: 0 18px 40px rgba(19, 34, 56, .14); }
+  .karte h2 { margin: 0 0 8px; font-size: 1.2rem; color: var(--blau); }
+  .karte p { margin: 0; color: var(--grau); line-height: 1.6; }
+  .karte a { display: inline-block; margin-top: 14px; color: var(--blau); font-weight: bold; text-decoration: none; }
+  .karte a:hover { text-decoration: underline; }
+  .banner {
+    margin-top: 28px;
+    padding: 20px 26px;
+    background: #fff;
+    border-left: 5px solid var(--blau);
+    border-radius: 8px;
+    color: var(--grau);
+    line-height: 1.6;
+    box-shadow: 0 12px 30px rgba(19, 34, 56, .08);
+  }
+  .banner strong { color: var(--dunkel); }
+  .abmelden {
+    display: inline-block;
+    margin-top: 28px;
+    padding: 10px 20px;
+    background: transparent;
+    border: 1px solid var(--rand);
+    border-radius: 6px;
+    color: var(--grau);
+    text-decoration: none;
+    font-size: .95rem;
+  }
+  .abmelden:hover { border-color: var(--blau); color: var(--blau); }
+  @media screen and (max-width: 480px) { .kopf { padding: 36px 18px; } }
+</style>
 </head>
 <body>
-    <main>
-        <!-- Dieser Bereich ist der Einstiegspunkt nach erfolgreicher Anmeldung. -->
-        <h1>Willkommen bei Raphdi-LoGaKo</h1>
-        <p>Die Anmeldung war erfolgreich.</p>
-    </main>
+<header class="kopf">
+  <p class="marke">Raphdi-LoGaKo</p>
+  <h1>Willkommen zurück!</h1>
+  <p>Hier findet ihr alles rund um unsere Familie.</p>
+</header>
+
+<main class="inhalt">
+  <section class="grid">
+    <article class="karte">
+      <h2>Familien-Kalender</h2>
+      <p>Geburtstage, Feiertage und gemeinsame Termine an einem Ort.</p>
+      <a href="#">Zum Kalender →</a>
+    </article>
+
+    <article class="karte">
+      <h2>Galerie</h2>
+      <p>Unsere schönsten Momente und Erinnerungen in Bildern.</p>
+      <a href="#">Zur Galerie →</a>
+    </article>
+
+    <article class="karte">
+      <h2>Kontakte</h2>
+      <p>Alle Adressen und Rufnummern der Familie auf einen Blick.</p>
+      <a href="#">Zu den Kontakten →</a>
+    </article>
+
+    <article class="karte">
+      <h2>Nachrichten</h2>
+      <p>Neues aus der Familie – wer schreibt, das bleibt hier stehen.</p>
+      <a href="#">Zum Nachrichtenbrett →</a>
+    </article>
+  </section>
+
+  <section class="banner">
+    <strong>Neuigkeit:</strong> Die Familienseite ist jetzt online. Hier entstehen nach und nach Kalender, Galerie und mehr. Ideen und Wünsche bitte an Ralph oder Raphael melden.
+  </section>
+
+  <a class="abmelden" href="index.html">← Abmelden</a>
+</main>
 </body>
 </html>
