@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anmelden | Raphdi-Familienseite</title>
+<style>
+  :root { --dunkel: #132238; --blau: #1769aa; --grau: #637083; --rand: #d6dee8; }
+  * { box-sizing: border-box; }
+  body {
+    min-height: 100vh;
+    margin: 0;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    color: var(--dunkel);
+    font-family: Arial, Helvetica, sans-serif;
+    background: linear-gradient(135deg, #eaf4fb, #f8fbfd 55%, #dce9f3);
+  }
+  .anmeldung {
+    width: min(100%, 440px);
+    padding: 40px;
+    background: #fff;
+    border: 1px solid rgba(19, 34, 56, .1);
+    border-radius: 12px;
+    box-shadow: 0 18px 45px rgba(19, 34, 56, .14);
+  }
+  .marke { margin: 0 0 8px; color: var(--blau); font-weight: bold; letter-spacing: .08em; text-transform: uppercase; }
+  h1 { margin: 0; font-size: 1.8rem; }
+  .beschreibung { margin: 10px 0 24px; color: var(--grau); line-height: 1.5; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 8px; }
+  .tab {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--rand);
+    border-radius: 8px;
+    background: #f4f8fb;
+    color: var(--grau);
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+  }
+  .tab.aktiv { background: var(--blau); border-color: var(--blau); color: #fff; }
+  label { display: block; margin: 16px 0 7px; font-weight: bold; }
+  input[type=text], input[type=email], input[type=password] {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--rand);
+    border-radius: 6px;
+    font-size: 1rem;
+  }
+  input:focus { outline: 3px solid rgba(23, 105, 170, .2); border-color: var(--blau); }
+  button[type=submit] {
+    width: 100%;
+    margin-top: 24px;
+    padding: 14px;
+    border: none;
+    border-radius: 6px;
+    background-color: var(--blau);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  button[type=submit]:hover { background-color: #125789; }
+  .status { min-height: 24px; margin: 16px 0 0; color: #a33a2b; font-size: .95rem; text-align: center; }
+  .status.erfolg { color: #177245; }
+  .passwort-link { display: block; margin-top: 14px; color: var(--grau); font-size: .9rem; text-align: center; }
+  .passwort-link button {
+    background: none; border: none; padding: 0; color: var(--blau);
+    font-size: inherit; text-decoration: underline; cursor: pointer;
+  }
+  .zurueck { display: block; margin-top: 18px; color: var(--grau); font-size: .9rem; text-align: center; text-decoration: none; }
+  .zurueck:hover { color: var(--blau); }
+  @media screen and (max-width: 480px) { .anmeldung { padding: 28px 22px; } }
+</style>
+</head>
+<body>
+<main class="anmeldung">
+  <p class="marke">Raphdi-LoGaKo</p>
+  <h1>Anmelden</h1>
+  <p class="beschreibung">Melde dich an, um zur Familien-Startseite zu gelangen.</p>
+
+  <div class="tabs" role="tablist">
+    <button type="button" class="tab aktiv" id="tab-anmelden" role="tab">Anmelden</button>
+    <button type="button" class="tab" id="tab-registrieren" role="tab">Registrieren</button>
+  </div>
+
+  <form id="anmeldeformular" novalidate>
+    <div class="feld-registrieren" hidden>
+      <label for="name">Anzeigename</label>
+      <input id="name" name="name" type="text" autocomplete="name" placeholder="Wie möchtest du genannt werden?">
+    </div>
+
+    <label for="email">E-Mail-Adresse</label>
+    <input id="email" name="email" type="email" autocomplete="email" placeholder="E-Mail eingeben" required>
+
+    <label for="passwort">Passwort</label>
+    <input id="passwort" name="passwort" type="password" autocomplete="current-password" placeholder="Passwort eingeben" required>
+
+    <button type="submit" id="senden">Anmelden</button>
+    <p id="status" class="status" role="alert" aria-live="polite"></p>
+  </form>
+
+  <p class="passwort-link">Passwort vergessen? <button type="button" id="passwort-zuruecksetzen">Passwort zurücksetzen</button></p>
+  <a class="zurueck" href="index.html">← Zurück zur Startseite</a>
+</main>
+
+<script type="module">
+import { initializeApp } from 'firebase/app';
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, sendPasswordResetEmail } from 'firebase/auth';
+import { firebaseConfig } from './firebase-config.js';
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+const formular = document.getElementById('anmeldeformular');
+const status = document.getElementById('status');
+const senden = document.getElementById('senden');
+const tabAnmelden = document.getElementById('tab-anmelden');
+const tabRegistrieren = document.getElementById('tab-registrieren');
+const feldRegistrieren = document.querySelector('.feld-registrieren');
+const passwortLink = document.getElementById('passwort-zuruecksetzen');
+
+let modus = 'anmelden';
+
+// Bereits angemeldete Nutzer direkt zur Startseite schicken.
+onAuthStateChanged(auth, (benutzer) => {
+  if (benutzer) window.location.href = 'Startseite.html';
+});
+
+function setzeModus(neu) {
+  modus = neu;
+  const anmelden = modus === 'anmelden';
+  tabAnmelden.classList.toggle('aktiv', anmelden);
+  tabRegistrieren.classList.toggle('aktiv', !anmelden);
+  feldRegistrieren.hidden = anmelden;
+  senden.textContent = anmelden ? 'Anmelden' : 'Konto erstellen';
+  document.getElementById('passwort').autocomplete = anmelden ? 'current-password' : 'new-password';
+  status.textContent = '';
+}
+
+tabAnmelden.addEventListener('click', () => setzeModus('anmelden'));
+tabRegistrieren.addEventListener('click', () => setzeModus('registrieren'));
+
+formular.addEventListener('submit', (ereignis) => {
+  ereignis.preventDefault();
+  if (!formular.checkValidity()) {
+    formular.reportValidity();
+    return;
+  }
+
+  const email = document.getElementById('email').value.trim();
+  const passwort = document.getElementById('passwort').value;
+  status.classList.remove('erfolg');
+
+  if (modus === 'anmelden') {
+    signInWithEmailAndPassword(auth, email, passwort)
+      .then(() => { status.textContent = 'Anmeldung erfolgreich – dich leite ich weiter …'; status.classList.add('erfolg'); })
+      .catch(zeigeFehler);
+    return;
+  }
+
+  const name = document.getElementById('name').value.trim();
+  createUserWithEmailAndPassword(auth, email, passwort)
+    .then(async (ergebnis) => {
+      if (name) await updateProfile(ergebnis.user, { displayName: name });
+      status.textContent = 'Konto erstellt – dich leite ich weiter …';
+      status.classList.add('erfolg');
+      window.location.href = 'Startseite.html';
+    })
+    .catch(zeigeFehler);
+});
+
+passwortLink.addEventListener('click', () => {
+  const email = document.getElementById('email').value.trim();
+  if (!email) {
+    status.textContent = 'Bitte zuerst deine E-Mail-Adresse eingeben.';
+    return;
+  }
+  sendPasswordResetEmail(auth, email)
+    .then(() => {
+      status.textContent = 'Eine E-Mail zum Zurücksetzen wurde gesendet.';
+      status.classList.add('erfolg');
+    })
+    .catch(zeigeFehler);
+});
+
+function zeigeFehler(fehler) {
+  status.classList.remove('erfolg');
+  switch (fehler.code) {
+    case 'auth/invalid-email': status.textContent = 'Die E-Mail-Adresse ist ungültig.'; break;
+    case 'auth/user-not-found': case 'auth/wrong-password':
+    case 'auth/invalid-credential': status.textContent = 'E-Mail oder Passwort ist falsch.'; break;
+    case 'auth/email-already-in-use': status.textContent = 'Diese E-Mail ist bereits registriert.'; break;
+    case 'auth/weak-password': status.textContent = 'Das Passwort ist zu schwach (mindestens 6 Zeichen).'; break;
+    case 'auth/too-many-requests': status.textContent = 'Zu viele Versuche. Bitte warte kurz und probiere es erneut.'; break;
+    default: status.textContent = 'Es ist ein Fehler aufgetreten. Bitte versuche es erneut.';
+  }
+}
+</script>
+
+</body>
+</html>

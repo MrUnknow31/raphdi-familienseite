@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Startseite | Raphdi-LoGaKo</title>
+<title>Startseite | Raphdi-Familienseite</title>
 <style>
   :root { --dunkel: #132238; --blau: #1769aa; --hell-blau: #eaf4fb; --grau: #637083; --rand: #d6dee8; }
   * { box-sizing: border-box; }
@@ -17,7 +17,7 @@
   .kopf {
     background: linear-gradient(120deg, var(--dunkel), #285a8f);
     color: #fff;
-    padding: 48px 24px;
+    padding: 40px 24px 28px;
     text-align: center;
   }
   .kopf .marke { margin: 0 0 8px; color: #9fc6e8; font-weight: bold; letter-spacing: .12em; text-transform: uppercase; }
@@ -49,19 +49,31 @@
     box-shadow: 0 12px 30px rgba(19, 34, 56, .08);
   }
   .banner strong { color: var(--dunkel); }
+  .leiste {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 32px;
+    padding: 16px 22px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 12px 30px rgba(19, 34, 56, .08);
+  }
+  .benutzer-info { color: var(--grau); font-size: .95rem; }
+  .benutzer-info strong { color: var(--dunkel); }
   .abmelden {
-    display: inline-block;
-    margin-top: 28px;
     padding: 10px 20px;
     background: transparent;
     border: 1px solid var(--rand);
     border-radius: 6px;
     color: var(--grau);
-    text-decoration: none;
     font-size: .95rem;
+    cursor: pointer;
   }
   .abmelden:hover { border-color: var(--blau); color: var(--blau); }
-  @media screen and (max-width: 480px) { .kopf { padding: 36px 18px; } }
+  @media screen and (max-width: 480px) { .kopf { padding: 32px 18px 24px; } }
 </style>
 </head>
 <body>
@@ -102,7 +114,40 @@
     <strong>Neuigkeit:</strong> Die Familienseite ist jetzt online. Hier entstehen nach und nach Kalender, Galerie und mehr. Ideen und Wünsche bitte an Ralph oder Raphael melden.
   </section>
 
-  <a class="abmelden" href="index.html">← Abmelden</a>
+  <div class="leiste">
+    <span class="benutzer-info">Angemeldet als: <strong id="benutzer">…</strong></span>
+    <button class="abmelden" id="abmelden" type="button">Abmelden</button>
+  </div>
 </main>
+
+<script type="module">
+import { initializeApp } from 'firebase/app';
+import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
+import { firebaseConfig } from './firebase-config.js';
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+const benutzerAnzeige = document.getElementById('benutzer');
+const abmeldenButton = document.getElementById('abmelden');
+
+// Nicht angemeldete Besucher werden zum Login geschickt.
+onAuthStateChanged(auth, (benutzer) => {
+  if (!benutzer) {
+    window.location.href = 'login.html';
+    return;
+  }
+  const name = benutzer.displayName || benutzer.email;
+  benutzerAnzeige.textContent = name;
+  document.title = `Startseite | ${name}`;
+});
+
+abmeldenButton.addEventListener('click', () => {
+  signOut(auth).then(() => {
+    window.location.href = 'index.html';
+  });
+});
+</script>
+
 </body>
 </html>
