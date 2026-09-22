@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin-Bereich | Raphdi-Familienseite</title>
+<style>
+  :root { --dunkel: #132238; --blau: #1769aa; --grau: #637083; --rand: #d6dee8; --rot: #a33a2b; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    color: var(--dunkel);
+    font-family: Arial, Helvetica, sans-serif;
+    background: linear-gradient(160deg, #eaf4fb, #f8fbfd 55%, #dce9f3);
+    min-height: 100vh;
+  }
+  .kopf { background: linear-gradient(120deg, var(--dunkel), #285a8f); color: #fff; padding: 32px 24px 24px; text-align: center; }
+  .kopf .marke { margin: 0 0 6px; color: #9fc6e8; font-weight: bold; letter-spacing: .12em; text-transform: uppercase; }
+  .kopf h1 { margin: 0; font-size: clamp(1.6rem, 4vw, 2.2rem); }
+  .inhalt { max-width: 1000px; margin: 0 auto; padding: 32px 24px 64px; }
+  .karte, .panel {
+    background: #fff;
+    border: 1px solid rgba(19, 34, 56, .1);
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(19, 34, 56, .08);
+    padding: 24px;
+  }
+  .passwort-zeile { display: flex; gap: 10px; flex-wrap: wrap; }
+  input[type=password], input[type=text], input[type=email] {
+    flex: 1;
+    min-width: 220px;
+    padding: 12px 14px;
+    border: 1px solid var(--rand);
+    border-radius: 6px;
+    font-size: 1rem;
+  }
+  input:focus { outline: 3px solid rgba(23, 105, 170, .2); border-color: var(--blau); }
+  label { display: block; margin: 12px 0 5px; font-weight: bold; font-size: .95rem; }
+  .knopf {
+    padding: 12px 22px;
+    background-color: var(--blau);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .knopf:hover { background-color: #125789; }
+  .knopf.gefahr { background: #f44336; }
+  .knopf.gefahr:hover { background: #c63225; }
+  .knopf.leicht { background: transparent; border: 1px solid var(--rand); color: var(--grau); }
+  .knopf.leicht:hover { border-color: var(--blau); color: var(--blau); }
+  .knopf:disabled { opacity: .5; cursor: default; }
+  .status { min-height: 24px; margin: 14px 0 0; color: var(--rot); font-size: .95rem; }
+  .status.erfolg { color: #177245; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: .95rem; }
+  th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #edf1f6; vertical-align: top; }
+  th { color: var(--grau); font-size: .85rem; text-transform: uppercase; letter-spacing: .04em; }
+  .abzeichen { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: .8rem; font-weight: bold; }
+  .abzeichen.aktiv { background: #e2f4e4; color: #177245; }
+  .abzeichen.aus { background: #fdeaea; color: #a33a2b; }
+  .aktionen { display: flex; gap: 8px; flex-wrap: wrap; }
+  .keine { color: var(--grau); text-align: center; padding: 20px 0; }
+  .leiste-daten { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+  .anzahl { color: var(--grau); font-size: .9rem; }
+  .zurueck { display: inline-block; margin-top: 24px; color: var(--grau); font-size: .9rem; text-decoration: none; }
+  .zurueck:hover { color: var(--blau); }
+  .hasstext { font-size: .8rem; }
+  @media screen and (max-width: 640px) { th.zweit, td.zweit { display: none; } }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <p class="marke">Raphdi-LoGaKo</p>
+  <h1>Admin-Bereich</h1>
+  <p>Account-Verwaltung der Familienseite</p>
+</header>
+
+<main class="inhalt">
+  <section class="karte" id="login-karte">
+    <h2 style="margin-top:0; color: var(--blau);">Zugang erforderlich</h2>
+    <p style="color: var(--grau); line-height:1.6;">Gib dein Admin-Passwort ein, um die Nutzerkonten zu verwalten.</p>
+    <div class="passwort-zeile">
+      <input type="password" id="admin-passwort" placeholder="Admin-Passwort" autocomplete="off">
+      <button class="knopf" id="login-knopf" type="button">Freischalten</button>
+    </div>
+    <p id="login-status" class="status" role="alert" aria-live="polite"></p>
+  </section>
+
+  <section class="panel" id="panel-verwaltung" hidden>
+    <div class="leiste-daten">
+      <span class="anzahl" id="anzahl"></span>
+      <div class="aktionen">
+        <button class="knopf" id="liste-laden" type="button">Nutzer laden</button>
+        <button class="knopf leicht" id="abmelden" type="button">Abmelden</button>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th class="zweit">E-Mail</th>
+          <th>Status</th>
+          <th class="zweit">Erstellt</th>
+          <th>Aktionen</th>
+        </tr>
+      </thead>
+      <tbody id="nutzer-tabelle"></tbody>
+    </table>
+    <p id="status" class="status" role="alert" aria-live="polite"></p>
+  </section>
+
+  <a class="zurueck" href="Startseite.html">← Zurück zur Startseite</a>
+</main>
+
+<script>
+// ============================================================
+// WICHTIG: Hier die Netlify-URL deiner Admin-Funktion eintragen,
+// nachdem du das Projekt bei Netlify importiert hast.
+// Sie sieht so aus: https://DEIN-PROJEKT.netlify.app/.netlify/functions/admin
+// ============================================================
+const API_URL = "https://DEIN-PROJEKT.netlify.app/.netlify/functions/admin";
+
+const loginKarte = document.getElementById('login-karte');
+const panel = document.getElementById('panel-verwaltung');
+const passwortFeld = document.getElementById('admin-passwort');
+const loginKnopf = document.getElementById('login-knopf');
+const loginStatus = document.getElementById('login-status');
+const status = document.getElementById('status');
+const tabelle = document.getElementById('nutzer-tabelle');
+const anzahl = document.getElementById('anzahl');
+const listeLaden = document.getElementById('liste-laden');
+const abmeldeKnopf = document.getElementById('abmelden');
+
+let adminKey = sessionStorage.getItem('adminKey') || '';
+if (adminKey) freischalten();
+
+passwortFeld.addEventListener('keydown', (e) => { if (e.key === 'Enter') freischalten(); });
+loginKnopf.addEventListener('click', freischalten);
+listeLaden.addEventListener('click', ladeNutzer);
+abmeldeKnopf.addEventListener('click', () => {
+  adminKey = '';
+  sessionStorage.removeItem('adminKey');
+  loginKarte.hidden = false;
+  panel.hidden = true;
+  passwortFeld.value = '';
+});
+
+function freischalten() {
+  adminKey = (passwortFeld.value || '').trim();
+  if (!adminKey) { loginStatus.textContent = 'Bitte Admin-Passwort eingeben.'; return; }
+  sessionStorage.setItem('adminKey', adminKey);
+  loginKnopf.disabled = true;
+  loginStatus.textContent = 'Wird geprüft …';
+
+  anfrage({ action: 'list' })
+    .then((daten) => {
+      loginKarte.hidden = true;
+      panel.hidden = false;
+      passwortFeld.value = '';
+      zeigeNutzer(daten);
+    })
+    .catch((fehler) => {
+      sessionStorage.removeItem('adminKey');
+      loginKnopf.disabled = false;
+      loginStatus.textContent = fehler;
+    });
+}
+
+function ladeNutzer() {
+  status.textContent = 'Lade Nutzer …';
+  ladeAlleSeiten().then((daten) => { zeigeNutzer(daten); status.textContent = ''; });
+}
+
+async function ladeAlleSeiten() {
+  let alle = [];
+  let pageToken = undefined;
+  do {
+    const daten = await anfrage({ action: 'list', pageToken });
+    alle = alle.concat(daten.users);
+    pageToken = daten.nextPageToken;
+  } while (pageToken);
+  return { users: alle };
+}
+
+function zeigeNutzer(daten) {
+  anzahl.textContent = `${daten.users.length} Nutzerkonten`;
+  tabelle.innerHTML = '';
+  if (daten.users.length === 0) {
+    tabelle.innerHTML = '<tr><td colspan="5" class="keine">Keine Nutzer gefunden.</td></tr>';
+    return;
+  }
+  daten.users.forEach((nutzer) => tabelle.appendChild(zeile(nutzer)));
+}
+
+function zeile(nutzer) {
+  const tr = document.createElement('tr');
+
+  const nameTd = document.createElement('td');
+  nameTd.textContent = nutzer.displayName || '–';
+
+  const emailTd = document.createElement('td');
+  emailTd.className = 'zweit';
+  emailTd.textContent = nutzer.email || '–';
+
+  const statusTd = document.createElement('td');
+  const abzeichen = document.createElement('span');
+  if (nutzer.disabled) { abzeichen.className = 'abzeichen aus'; abzeichen.textContent = 'Deaktiviert'; }
+  else { abzeichen.className = 'abzeichen aktiv'; abzeichen.textContent = 'Aktiv'; }
+  statusTd.appendChild(abzeichen);
+
+  const erstelltTd = document.createElement('td');
+  erstelltTd.className = 'zweit';
+  erstelltTd.textContent = nutzer.erstellt ? new Date(nutzer.erstellt).toLocaleDateString('de-DE') : '–';
+
+  const aktionenTd = document.createElement('td');
+  const aktionen = document.createElement('div');
+  aktionen.className = 'aktionen';
+  const bearbeiten = document.createElement('button');
+  bearbeiten.className = 'knopf leicht';
+  bearbeiten.textContent = 'Bearbeiten';
+  bearbeiten.addEventListener('click', () => aktionenTd.replaceWith(editiereZeile(nutzer)));
+  const loeschen = document.createElement('button');
+  loeschen.className = 'knopf gefahr';
+  loeschen.textContent = 'Löschen';
+  loeschen.addEventListener('click', () => loescheNutzer(nutzer));
+  loeschen.style.padding = '8px 14px'; bearbeiten.style.padding = '8px 14px';
+  aktionen.appendChild(bearbeiten);
+  aktionen.appendChild(loeschen);
+  aktionenTd.appendChild(aktionen);
+
+  tr.appendChild(nameTd);
+  tr.appendChild(emailTd);
+  tr.appendChild(statusTd);
+  tr.appendChild(erstelltTd);
+  tr.appendChild(aktionenTd);
+  return tr;
+}
+
+function editiereZeile(nutzer) {
+  const td = document.createElement('td');
+  td.colSpan = 5;
+
+  const feld = (text, typ, wert) => {
+    const label = document.createElement('label');
+    label.textContent = text;
+    const input = document.createElement('input');
+    input.type = typ;
+    input.value = wert || '';
+    label.appendChild(input);
+    return { label, input };
+  };
+
+  const name = feld('Anzeigename', 'text', nutzer.displayName);
+  const email = feld('E-Mail', 'email', nutzer.email);
+  const passwort = feld('Neues Passwort (leer lassen, wenn unverändert)', 'text', '');
+
+  const sperre = document.createElement('label');
+  const sperreInput = document.createElement('input');
+  sperreInput.type = 'checkbox';
+  sperreInput.checked = !!nutzer.disabled;
+  sperre.appendChild(sperreInput);
+  sperre.appendChild(document.createTextNode(' Konto deaktivieren'));
+
+  const aktionen = document.createElement('div');
+  aktionen.className = 'aktionen';
+  aktionen.style.marginTop = '14px';
+  const speichern = document.createElement('button');
+  speichern.className = 'knopf';
+  speichern.textContent = 'Speichern';
+  const abbrechen = document.createElement('button');
+  abbrechen.className = 'knopf leicht';
+  abbrechen.textContent = 'Abbrechen';
+  aktionen.appendChild(speichern);
+  aktionen.appendChild(abbrechen);
+
+  td.appendChild(name.label);
+  td.appendChild(email.label);
+  td.appendChild(passwort.label);
+  td.appendChild(sperre);
+  td.appendChild(aktionen);
+
+  function entferneEdit() {
+    const zeileAlt = tbodyRowFor(td);
+    zeileAlt.replaceWith(zeile(nutzer));
+  }
+
+  abbrechen.addEventListener('click', entferneEdit);
+  speichern.addEventListener('click', () => {
+    status.textContent = 'Wird gespeichert …';
+    anfrage({
+      action: 'update',
+      uid: nutzer.uid,
+      displayName: name.input.value,
+      email: email.input.value,
+      password: passwort.input.value,
+      disabled: sperreInput.checked
+    }).then((daten) => {
+      nutzer = daten.user;
+      status.textContent = 'Gespeichert.';
+      status.classList.add('erfolg');
+      setTimeout(() => { status.textContent = ''; status.classList.remove('erfolg'); }, 3000);
+      ladeNutzer();
+    }).catch((fehler) => {
+      status.textContent = fehler;
+    });
+  });
+
+  return td;
+}
+
+function tbodyRowFor(td) {
+  return td.closest('tr');
+}
+
+function loescheNutzer(nutzer) {
+  const bestaetigung = confirm(`Konto von "${nutzer.displayName || nutzer.email}" wirklich löschen?\nDas kann nicht rückgängig gemacht werden.`);
+  if (!bestaetigung) return;
+  anfrage({ action: 'delete', uid: nutzer.uid })
+    .then(() => {
+      status.textContent = 'Konto gelöscht.';
+      status.classList.add('erfolg');
+      setTimeout(() => { status.textContent = ''; status.classList.remove('erfolg'); }, 3000);
+      ladeNutzer();
+    })
+    .catch((fehler) => { status.textContent = fehler; });
+}
+
+async function anfrage(inhalt) {
+  const daten = { adminKey, ...inhalt };
+  let antwort;
+  try {
+    antwort = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(daten)
+    });
+  } catch {
+    throw new Error('Die Admin-Funktion ist nicht erreichbar. Prüfe die API_URL oben in der Datei.');
+  }
+  const json = await antwort.json();
+  if (!antwort.ok || !json.ok) {
+    throw new Error(json.error || 'Der Server hat einen Fehler gemeldet.');
+  }
+  return json;
+}
+</script>
+
+</body>
+</html>
