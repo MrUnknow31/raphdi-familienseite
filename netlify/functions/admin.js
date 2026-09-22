@@ -20,19 +20,18 @@ const ERLAUBTE_ORIGINE = [
 ];
 
 exports.handler = async (event) => {
+  const origin = event.headers.origin || '';
+  const erlaubt = ERLAUBTE_ORIGINE.some((o) => origin.startsWith(o));
   const headers = {
+    'Access-Control-Allow-Origin': erlaubt ? origin : 'https://mrunknow31.github.io',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
     'Content-Type': 'application/json'
   };
 
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 204, headers, body: '' };
   }
-
-  const origin = event.headers.origin || '';
-  const erlaubt = ERLAUBTE_ORIGINE.some((o) => origin.startsWith(o));
-  headers['Access-Control-Allow-Origin'] = erlaubt ? origin : 'https://mrunknow31.github.io';
-  headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS';
-  headers['Access-Control-Allow-Headers'] = 'Content-Type';
 
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, headers, body: JSON.stringify({ ok: false, error: 'Nur POST erlaubt.' }) };
