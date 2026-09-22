@@ -120,6 +120,14 @@
   </div>
 </main>
 
+<script type="importmap">
+{
+  "imports": {
+    "firebase/app": "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js",
+    "firebase/auth": "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js"
+  }
+}
+</script>
 <script type="module">
 import { initializeApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
