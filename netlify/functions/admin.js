@@ -1,13 +1,12 @@
-const { initializeApp, cert } = require('firebase-admin/app');
-const { getAuth } = require('firebase-admin/auth');
+const admin = require('firebase-admin');
 
 let app = null;
 
 function getApp() {
   if (!app) {
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-    app = initializeApp({
-      credential: cert(serviceAccount)
+    app = admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount)
     });
   }
   return app;
@@ -54,7 +53,7 @@ exports.handler = async (event) => {
   }
 
   try {
-    const ergebnis = await bearbeite(getAuth(getApp()), body);
+    const ergebnis = await bearbeite(admin.auth(getApp()), body);
     return { statusCode: 200, headers, body: JSON.stringify(ergebnis) };
   } catch (fehler) {
     return { statusCode: 500, headers, body: JSON.stringify({ ok: false, error: fehler.message }) };
